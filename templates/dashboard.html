@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+  <p>Welcome, {{ user_name }}! Here you can manage your transactions and budgets.</p>
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <a href="#" class="btn btn-primary w-100 mb-2">Add Transaction</a>
+    </div>
+    <div class="col-md-6">
+      <a href="#" class="btn btn-success w-100 mb-2">Manage Budgets</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

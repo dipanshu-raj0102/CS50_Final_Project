@@ -14,7 +14,19 @@ def get_db_connection():
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    if 'user_id' in session:
+        # Logged-in users see dashboard link, but homepage is still general
+        return render_template('home.html', user_name=session['user_name'])
+    return render_template('home.html', user_name=None)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        flash(' Please log in first.', 'error')
+        return redirect(url_for('login'))
+
+    return render_template('dashboard.html', user_name=session['user_name'])
+
 
 @app.route('/register', methods=['GET','POST'])
 def register():
