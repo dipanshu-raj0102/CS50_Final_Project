@@ -1,4 +1,4 @@
-from flask import Flask,request, render_template, redirect,url_for, flash
+from flask import Flask, flash, request, render_template, redirect,url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
@@ -7,7 +7,7 @@ import sqlite3
 app = Flask(__name__)
 app.secret_key='higuys'
 
-def get_db_connections():
+def get_db_connection():
     conn = sqlite3.connect('finance.db')
     conn.row_factory = sqlite3.Row
     return conn
@@ -24,7 +24,7 @@ def register():
         UserName = request.form.get('UserName').strip()
         Email = request.form.get('Email').strip().lower()
         Password = request.form.get('Password')
-        conn = get_db_connections()
+        conn = get_db_connection()
         cursor = conn.cursor()
         if UserName and Password and Email:
             existing_user = cursor.execute(
@@ -49,9 +49,39 @@ def register():
         
 @app.route('/login',methods=['GET','POST'])
 def login():
-    return render_template('login.html')
-          
-        
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        UserId = request.form.get('UserId').strip()
+        Password = request.form.get('Password')
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if UserId and Password:
+            user = cursor.execute(
+                'SELECT * FROM users WHERE name = ? OR email = ?',(UserId,UserId)
+            ).fetchone()
+
+            conn.close()
+
+            if user is None:
+                flash('User not found. Please register first','error')
+                return redirect(url_for('login'))
+            
+            if check_password_hash(user['password_hash'], Password):
+                session['user_id'] = user['id']
+                session['user_name'] = user['name']
+                flash(f"Welcome back, {user['name']}!",'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect Password.','error')
+                return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Logged out successfully', 'success')
+    return redirect(url_for('login'))
+       
 if __name__ == '__main__':
     app.run(debug=True)
     
