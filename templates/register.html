@@ -1,14 +1,74 @@
 {% extends "layout.html" %}
-
-{% block title %} Register {% endblock %}
-
 {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow p-4 rounded-4">
+        <h3 class="text-center mb-4">📝 Register</h3>
+        
+        <form action="{{ url_for('register') }}" method="POST">
+          <div class="mb-3">
+            <label for="UserName" class="form-label">Username</label>
+            <input type="text" class="form-control" id="UserName" name="UserName" required>
+          </div>
 
-<form method="POST">
-    <input type="text" name="Name" placeholder="Name" required>
-    <input type="mail" name="Email" placeholder="Email" required>
-    <input type="text" name="Password" placeholder="Password" required>
-    <input type="submit" value="Register">
-</form>
+          <div class="mb-3">
+            <label for="Email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="Email" name="Email" required>
+          </div>
 
+          <div class="mb-3">
+            <label for="Password" class="form-label">Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="Password" name="Password" required>
+              <button type="button" class="btn btn-outline-secondary" id="togglePassword">👁️</button>
+            </div>
+            <div class="progress mt-2" style="height: 5px;">
+              <div id="passwordStrength" class="progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="ConfirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 rounded-pill mt-2">Register</button>
+        </form>
+
+        <p class="text-center mt-3">
+          Already have an account?
+          <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Password Strength + Toggle JS -->
+<script>
+const passwordInput = document.getElementById('Password');
+const strengthBar = document.getElementById('passwordStrength');
+const toggleBtn = document.getElementById('togglePassword');
+
+passwordInput.addEventListener('input', () => {
+  const val = passwordInput.value;
+  let strength = 0;
+
+  if (val.length > 6) strength++;
+  if (/[A-Z]/.test(val)) strength++;
+  if (/[0-9]/.test(val)) strength++;
+  if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+  const colors = ['bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
+  strengthBar.className = 'progress-bar ' + colors[strength - 1] || '';
+  strengthBar.style.width = (strength * 25) + '%';
+});
+
+toggleBtn.addEventListener('click', () => {
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+  toggleBtn.textContent = type === 'password' ? '👁️' : '🙈';
+});
+</script>
 {% endblock %}
