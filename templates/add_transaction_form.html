@@ -1,9 +1,9 @@
-<h3 class="text-center mb-3 mt-4">Add Transaction</h3>
+<h3 class="text-center mb-4 mt-2 fw-bold text-primary">Add New Transaction</h3>
 
-<form action="{{ url_for('add_transaction') }}" method="POST" class="p-3">
+<form action="{{ url_for('add_transaction') }}" method="POST" class="p-4 rounded-4 shadow-sm bg-light">
   <div class="mb-3">
-    <label for="category" class="form-label fw-semibold">Category</label>
-    <select name="category_id" id="category" class="form-select" required>
+    <label for="category" class="form-label fw-semibold text-secondary">Category</label>
+    <select name="category_id" id="category" class="form-select border-0 shadow-sm p-2" required>
       <option value="" disabled selected>Select category</option>
       {% for cat in categories %}
         <option value="{{ cat.id }}">{{ cat.name }} ({{ cat.type|capitalize }})</option>
@@ -12,61 +12,102 @@
   </div>
 
   <div class="mb-3">
-    <label for="amount" class="form-label fw-semibold">Amount (₹)</label>
+    <label for="amount" class="form-label fw-semibold text-secondary">Amount (₹)</label>
     <input
       type="number"
       name="amount"
       id="amount"
       step="1"
-      class="form-control"
+      class="form-control border-0 shadow-sm p-2"
       placeholder="Enter amount"
       required
     >
   </div>
 
   <div class="mb-3">
-    <label for="date" class="form-label fw-semibold">Date</label>
+    <label for="date" class="form-label fw-semibold text-secondary">Date</label>
     <input
       type="date"
       name="date"
       id="date"
-      class="form-control"
+      class="form-control border-0 shadow-sm p-2"
       required
       value="{{ '%Y-%m-%d' }}"
     >
   </div>
 
   <div class="mb-4">
-    <label for="note" class="form-label fw-semibold">Note</label>
+    <label for="note" class="form-label fw-semibold text-secondary">Note</label>
     <input
       type="text"
       name="note"
       id="note"
-      class="form-control"
+      class="form-control border-0 shadow-sm p-2"
       placeholder="Optional note"
     >
   </div>
 
-  <div class="d-flex justify-content-between">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" class="btn btn-primary">➕ Add Transaction</button>
+  <div class="d-flex justify-content-end gap-3">
+    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-primary px-4 fw-semibold">➕ Add</button>
   </div>
 </form>
 
 <style>
-  /* Optional: smooth modal form appearance */
+  /* Smooth modal form entrance */
   .modal-content {
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    animation: fadeIn 0.3s ease;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+    animation: fadeInUp 0.35s ease;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  h3 {
-    color: #0d6efd;
+  /* Title styling */
+  h3.text-primary {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Input fields */
+  input.form-control, select.form-select {
+    transition: all 0.2s ease-in-out;
+  }
+
+  input.form-control:focus, select.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    border-color: #0d6efd;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background: linear-gradient(135deg, #007bff, #00b4d8);
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #f1f1f1;
+  }
+
+  /* Overall spacing and layout */
+  form {
+    font-family: 'Inter', sans-serif;
   }
 </style>
