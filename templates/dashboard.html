@@ -1,15 +1,88 @@
 {% extends "layout.html" %}
-{% block content %}
-<div class="container mt-5">
-  <p>Welcome, {{ user_name }}! Here you can manage your transactions and budgets.</p>
 
-  <div class="row mt-4">
-    <div class="col-md-6">
-      <a href="#" class="btn btn-primary w-100 mb-2">Add Transaction</a>
-    </div>
-    <div class="col-md-6">
-      <a href="#" class="btn btn-success w-100 mb-2">Manage Budgets</a>
-    </div>
-  </div>
-</div>
+{% block head %}
+  <title>Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Popup modal style */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+    #modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+    }
+  </style>
 {% endblock %}
+
+{% block content %}
+  <h1>Dashboard</h1>
+  <h2>Your Transactions</h2>
+
+{% if transactions %}
+<table border="1" cellpadding="8">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Category</th>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tx in transactions %}
+    <tr>
+      <td>{{ tx['date'] }}</td>
+      <td>{{ tx['category_name'] }}</td>
+      <td>
+        {% if tx['category_type'] == 'income' %}
+          <span style="color: green;">Income</span>
+        {% else %}
+          <span style="color: red;">Expense</span>
+        {% endif %}
+      </td>
+      <td>₹{{ "%.2f"|format(tx['amount']) }}</td>
+      <td>{{ tx['note'] or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No transactions yet. Add one to get started!</p>
+{% endif %}
+
+  <button id="add_transaction">➕ Add Transaction</button>
+
+  <div id="modal">
+    <div id="modal-content"></div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const addBtn = document.getElementById('add_transaction');
+
+    // Open modal and load form via GET
+    addBtn.addEventListener('click', async () => {
+      const res = await fetch('/add_transaction');
+      const html = await res.text();
+      modalContent.innerHTML = html;
+      modal.style.display = 'flex';
+    });
+
+    // Close modal when clicking outside content
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  </script>
+{% endblock %}
+

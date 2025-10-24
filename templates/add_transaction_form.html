@@ -1,0 +1,20 @@
+<h3>Add Transaction</h3>
+<form action="{{ url_for('add_transaction') }}" method = "POST">
+  <label>Category:</label>
+  <select name="category_id" required>
+    {% for cat in categories %}
+      <option value="{{ cat.id }}">{{ cat.name }} ({{ cat.type }})</option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Amount: ₹</label>
+  <input type="number" name="amount" step="1" required><br><br>
+
+  <label>Date:</label>
+  <input type="date" name="date" required value="{{ '%Y-%m-%d'}}"><br><br>
+
+  <label>Note:</label>
+  <input type="text" name="note"><br><br>
+
+  <button id="add_transaction">➕ Add Transaction</button>
+</form>

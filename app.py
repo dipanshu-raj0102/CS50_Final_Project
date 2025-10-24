@@ -1,6 +1,7 @@
-from flask import Flask, flash, request, render_template, redirect,url_for, session
+from flask import Flask, flash, request, render_template, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+from datetime import datetime
 
 
 
@@ -24,8 +25,15 @@ def dashboard():
     if 'user_id' not in session:
         flash(' Please log in first.', 'error')
         return redirect(url_for('login'))
+    else:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        transactions = cursor.execute(
+            """SELECT t.id, t.amount, t.date, t.note, c.name AS category_name, c.type AS category_type FROM transactions t JOIN categories c ON t.category_id = c.id WHERE t.user_id = ?
+            ORDER BY date(t.date) DESC
+            """, (session['user_id'],)).fetchall()
 
-    return render_template('dashboard.html', user_name=session['user_name'])
+        return render_template('dashboard.html', user_name=session['user_name'], transactions = transactions)
 
 
 @app.route('/register', methods=['GET','POST'])
@@ -70,7 +78,7 @@ def login():
         cursor = conn.cursor()
         if UserId and Password:
             user = cursor.execute(
-                'SELECT * FROM users WHERE name = ? OR email = ?',(UserId,UserId)
+                'SELECT * FROM users WHERE name = ? OR email = ?',(UserId, UserId)
             ).fetchone()
 
             conn.close()
@@ -93,6 +101,41 @@ def logout():
     session.clear()
     flash('Logged out successfully', 'success')
     return redirect(url_for('login'))
+
+@app.route('/add_transaction', methods = ['POST','GET'])
+def add_transaction():
+    if request.method == "GET":
+        user_id = session.get('user_id')
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        categories = cursor.execute(
+            "SELECT * FROM categories WHERE user_id IS NULL OR user_id = ?", (user_id,)
+        ).fetchall()
+        conn.close()
+        return render_template("add_transaction_form.html", categories=categories)
+    elif request.method == 'POST':
+        category_id = request.form.get('category_id')
+        amount = request.form.get('amount')
+        date = request.form.get('date')
+        note = request.form.get('note')
+        user_id = session.get("user_id")
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if user_id and category_id and amount and date:
+            cursor.execute(
+                "INSERT INTO transactions (user_id, category_id, amount, date, note) VALUES (?, ?, ?, ?, ?)",
+                (user_id, category_id, amount, date, note),
+            )
+            conn.commit()
+            conn.close()
+            flash("Transaction added successfully!", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Please fill all the details", "error")
+            conn.close()
+
+
+
        
 if __name__ == '__main__':
     app.run(debug=True)
