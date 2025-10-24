@@ -32,8 +32,27 @@ def dashboard():
             """SELECT t.id, t.amount, t.date, t.note, c.name AS category_name, c.type AS category_type FROM transactions t JOIN categories c ON t.category_id = c.id WHERE t.user_id = ?
             ORDER BY date(t.date) DESC
             """, (session['user_id'],)).fetchall()
+        totals = cursor.execute(
+                """SELECT 
+                SUM(CASE WHEN c.type='income' THEN t.amount ELSE 0 END) AS total_income,
+                SUM(CASE WHEN c.type='expense' THEN t.amount ELSE 0 END) AS total_expense
+                FROM transactions t
+                JOIN categories c ON t.category_id = c.id
+                WHERE t.user_id = ?
+                """, (session['user_id'],)).fetchone()
 
-        return render_template('dashboard.html', user_name=session['user_name'], transactions = transactions)
+    # Expense per category
+        category_expense = cursor.execute(
+            """SELECT c.name AS category_name, SUM(t.amount) AS total
+            FROM transactions t
+            JOIN categories c ON t.category_id = c.id
+            WHERE t.user_id = ? AND c.type='expense'
+            GROUP BY c.name
+            """, (session['user_id'],)).fetchall()
+
+        conn.close()
+
+        return render_template('dashboard.html', user_name=session['user_name'], transactions = transactions, totals=totals, category_expense=category_expense)
 
 
 @app.route('/register', methods=['GET','POST'])
@@ -134,9 +153,28 @@ def add_transaction():
             flash("Please fill all the details", "error")
             conn.close()
 
+@app.route('/delete_txn/<int:txn_id>', methods=['POST'])
+def delete_txn(txn_id):
+    if 'user_id' not in session:
+        flash("Please log in first.", "error")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Delete only if the transaction belongs to logged-in user
+    cursor.execute(
+        "DELETE FROM transactions WHERE id = ? AND user_id = ?",
+        (txn_id, session['user_id'])
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("Transaction deleted successfully!", "success")
+    return redirect(url_for('dashboard'))
 
 
-       
 if __name__ == '__main__':
     app.run(debug=True)
     
