@@ -174,6 +174,32 @@ def delete_txn(txn_id):
     flash("Transaction deleted successfully!", "success")
     return redirect(url_for('dashboard'))
 
+@app.route('/edit_transaction/<int:txn_id>', methods=['GET', 'POST'])
+def edit_transaction(txn_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    transaction = cursor.execute("SELECT * FROM transactions WHERE id = ?", (txn_id,)).fetchone()
+    categories = cursor.execute("SELECT * FROM categories").fetchall()
+
+    if request.method == 'POST':
+        category_id = request.form.get('category_id')
+        amount = request.form.get('amount')
+        date = request.form.get('date')
+        note = request.form.get('note')
+
+        cursor.execute("""
+            UPDATE transactions
+            SET category_id = ?, amount = ?, date = ?, note = ?
+            WHERE id = ?
+        """, (category_id, amount, date, note, txn_id))
+        conn.commit()
+        conn.close()
+        flash('Transaction updated successfully!', 'success')
+        return redirect(url_for('dashboard'))
+
+    conn.close()
+    return render_template('edit_transaction_form.html', transaction=transaction, categories=categories)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

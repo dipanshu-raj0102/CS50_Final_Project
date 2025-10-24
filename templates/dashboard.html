@@ -179,9 +179,16 @@
               <td>₹{{ "%.2f"|format(tx['amount']) }}</td>
               <td>{{ tx['note'] or '-' }}</td>
               <td>
-                <form action="{{ url_for('delete_txn', txn_id=tx['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline-primary btn-sm edit-btn" data-id="{{ tx['id'] }}">
+                 Edit
+                 </button>
+  
+                 <form action="{{ url_for('delete_txn', txn_id=tx['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
                   <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                </form>
+                 </form>
+                </div>
+
               </td>
             </tr>
             {% endfor %}
@@ -203,6 +210,13 @@
 <div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" id="edit-modal-content"></div>
   </div>
 </div>
 
@@ -271,5 +285,19 @@
           }
       }
   });
+  
+const editModalElement = document.getElementById('editTransactionModal');
+const editModalContent = document.getElementById('edit-modal-content');
+const bootstrapEditModal = new bootstrap.Modal(editModalElement);
+
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const txnId = btn.dataset.id;
+        const res = await fetch(`/edit_transaction/${txnId}`);
+        const html = await res.text();
+        editModalContent.innerHTML = html;
+        bootstrapEditModal.show();
+    });
+});
 </script>
 {% endblock %}
