@@ -4,7 +4,7 @@ Smart Finance Manager
 Live Demo
     Deployed at: https://cs50-final-project-70l0.onrender.com
 
-    Demo Video: (Upload to YouTube and paste link here)
+    Demo Video: https://youtu.be/s3LkWEFBR8k
 
 Tech Stack
     Frontend: HTML, CSS, Bootstrap 5, Chart.js
