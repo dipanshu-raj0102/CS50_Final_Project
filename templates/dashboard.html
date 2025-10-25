@@ -125,6 +125,29 @@
     #incomeExpenseChart, #categoryExpenseChart {
       height: 300px;
     }
+
+    .summary-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+.progress {
+  background-color: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  border-radius: 8px;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+
   </style>
 {% endblock %}
 
@@ -132,6 +155,35 @@
 <div class="dashboard-container">
   <h1 class="text-center mb-4">Dashboard</h1>
   <p class="text-center text-secondary mb-5">Your financial overview at a glance — track, analyze, and manage your money smartly.</p>
+    
+  <!-- Summary Cards -->
+  <div class="row text-center mb-5">
+    <div class="col-md-4">
+      <div class="p-4 rounded-4 shadow-sm border border-success bg-gradient" 
+           style="background: linear-gradient(135deg, #dcfce7, #bbf7d0);">
+        <h6 class="text-success fw-semibold text-uppercase mb-2">Total Income</h6>
+        <h3 class="fw-bold text-success">₹{{ "%.2f"|format(totals['total_income'] or 0) }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="p-4 rounded-4 shadow-sm border border-danger bg-gradient" 
+           style="background: linear-gradient(135deg, #fee2e2, #fecaca);">
+        <h6 class="text-danger fw-semibold text-uppercase mb-2">Total Expense</h6>
+        <h3 class="fw-bold text-danger">₹{{ "%.2f"|format(totals['total_expense'] or 0) }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      {% set balance = (totals['total_income'] or 0) - (totals['total_expense'] or 0) %}
+      <div class="p-4 rounded-4 shadow-sm border border-primary bg-gradient" 
+           style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe);">
+        <h6 class="text-primary fw-semibold text-uppercase mb-2">Current Balance</h6>
+        <h3 class="fw-bold text-primary">₹{{ "%.2f"|format(balance) }}</h3>
+      </div>
+    </div>
+  </div>
+
 
   <div class="row g-4">
     <div class="col-md-6">
@@ -147,6 +199,43 @@
       </div>
     </div>
   </div>
+
+    <!-- Expense Breakdown Section -->
+  <div class="mt-5">
+    <h3 class="mb-4 text-center fw-semibold text-indigo-600">Expense Breakdown</h3>
+
+    {% if category_expense %}
+      {% set total_expense = totals['total_expense'] or 0 %}
+      <div class="card shadow-sm p-4 rounded-4 border-0" style="background: #f8fafc;">
+        <div class="list-group list-group-flush">
+          {% for cat in category_expense %}
+            {% set percent = (cat['total'] / total_expense * 100) if total_expense > 0 else 0 %}
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="fw-semibold text-gray-700">{{ cat['category_name'] }}</span>
+                <span class="fw-semibold text-dark">₹{{ "%.2f"|format(cat['total']) }}</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" 
+                     role="progressbar"
+                     style="
+                       width: {{ percent }}%; 
+                       background-color: {{ ['#818cf8','#facc15','#34d399','#f87171','#c084fc','#60a5fa'][loop.index0 % 6] }};
+                       transition: width 0.4s ease;">
+                </div>
+              </div>
+              <small class="text-muted">{{ "%.1f"|format(percent) }}% of total expenses</small>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center mt-3">
+        No expense data available yet. Add some expenses to view the breakdown.
+      </div>
+    {% endif %}
+  </div>
+
 
   <div class="mt-5">
     <h3 class="mb-3">Your Transactions</h3>
